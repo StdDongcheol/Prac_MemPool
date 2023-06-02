@@ -9,7 +9,7 @@ public:
     ~CNonObject() {};
 
 public:
-    float X;
-    float Y;
-    float Z;
+    double X;
+    double Y;
+    double Z;
 };

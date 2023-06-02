@@ -1,8 +1,5 @@
-#ifndef _CUSTOM_ALLOCATOR_
-#define _CUSTOM_ALLOCATOR_
 
 #include "CMemoryPool.h"
-
 
 #define IMPLEMENATION_MEMORYPOOL( ClassName ) \
 CMemoryPool *ClassName::m_MemoryPool = 0; \
@@ -13,16 +10,13 @@ CMemoryPool *ClassName::m_MemoryPool = 0; \
 		{ \
 			if (!m_MemoryPool) \
 				{ \
-					m_MemoryPool = new CMemoryPool; \
+					m_MemoryPool = new CMemoryPool(BlockSize); \
 				} \
-				return m_MemoryPool->Allocate(BlockSize); \
+			return m_MemoryPool->Allocate(BlockSize); \
 		} \
 		void operator delete(void* pBlockDelete, size_t BlockSize) \
 		{ \
-				m_MemoryPool->Deallocate(pBlockDelete, BlockSize); \
+			m_MemoryPool->Deallocate(pBlockDelete, BlockSize); \
 		} \
-		  protected: \
-			  static CMemoryPool* m_MemoryPool; \
-
-
-#endif // _CUSTOM_ALLOCATOR_
+	protected: \
+		static CMemoryPool* m_MemoryPool; \

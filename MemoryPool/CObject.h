@@ -13,8 +13,8 @@ public:
     ~CObject() {};
 
 public:
-    float X;
-    float Y;
-    float Z;
+    double X;
+    double Y;
+    double Z;
 };
 IMPLEMENATION_MEMORYPOOL(CObject);

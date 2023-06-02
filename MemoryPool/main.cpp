@@ -10,31 +10,19 @@ int main()
 	clock_t Start = clock();
 	clock_t End;
 
-	CObject* TestArr1[5000000] = {};
-	CNonObject* TestArr2[5000000] = {};
-
-
 	/// ============================================================
-	/// MemoryPool object start
+	/// MemoryPool object new & delete start
 	/// ============================================================
+	Start = clock();
 	
-	for (int i = 0; i < 5000000; ++i)
+	for (int i = 0; i < 10000000; ++i)
 	{
 		CObject* pObject = new CObject;
-		TestArr1[i] = pObject;
+		delete pObject;
 	}
+
 	End = clock();
-	std::cout << "MemoryPool object allocate Time : " << (double)(End - Start) / CLOCKS_PER_SEC << std::endl;
-
-
-	Start = clock();
-	for (int i = 0; i < 5000000; ++i)
-	{
-		delete TestArr1[i];
-	}
-	End = clock();
-	std::cout << "MemoryPool object deallocate Time : " << (double)(End - Start) / CLOCKS_PER_SEC << std::endl;
-
+	std::cout << "MemoryPooled object new & delete time : " << (double)(End - Start) / CLOCKS_PER_SEC << std::endl;
 	/// ============================================================
 	/// MemoryPool object end
 	/// ============================================================
@@ -42,31 +30,21 @@ int main()
 
 
 	/// ============================================================
-	/// Normal object start
+	/// Normal object new & delete start
 	/// ============================================================
-	
 	Start = clock();
-	for (int i = 0; i < 5000000; ++i)
-	{
 
+	for (int i = 0; i < 10000000; ++i)
+	{
 		CNonObject* pObject = new CNonObject;
-		TestArr2[i] = pObject;
+		delete pObject;
 	}
 	End = clock();
-	std::cout << "Normal object allocate Time : " << (double)(End - Start) / CLOCKS_PER_SEC << std::endl;
-
-
-	Start = clock();
-	for (int i = 0; i < 5000000; ++i)
-	{
-		delete TestArr2[i];
-	}
-	End = clock();
-	std::cout << "Normal object deallocate Time : " << (double)(End - Start) / CLOCKS_PER_SEC << std::endl;
+	std::cout << "Normal object new & delete time : " << (double)(End - Start) / CLOCKS_PER_SEC << std::endl;
 
 	/// ============================================================
 	/// Normal object end
 	/// ============================================================
-	
+
 	return 0;
 }

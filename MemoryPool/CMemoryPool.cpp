@@ -1,61 +1,51 @@
 
 #include "CMemoryPool.h"
+#include <vector>
 
-CMemoryPool::CMemoryPool()
+
+CMemoryPool::CMemoryPool() :
+	m_BlockSize(0),
+	m_BlockCount(0)
 {
-	Init();
+}
+
+CMemoryPool::CMemoryPool(size_t BlockSize, size_t BlockCount /* = 100000 */) :
+	m_BlockSize(BlockSize),
+	m_BlockCount(BlockCount)
+{
+	m_vecPool.resize(m_BlockSize * m_BlockCount);
+
+	for (int i = 0; i < m_BlockCount; ++i)
+		m_vecBlocks.push_back(&m_vecPool[i * m_BlockSize]);	// BlockSize만큼의 구획을 설정하여 vecBlock에 데이터 블록 추가.
 }
 
 CMemoryPool::~CMemoryPool()
 {
-	delete m_pPage;
 }
 
-void CMemoryPool::Init()
+void* CMemoryPool::Allocate(size_t Size)
 {
-	m_pPage = nullptr;
-	m_BlockIdToAllocate = 0;
-}
-
-// BlockSize = 128
-void* CMemoryPool::Allocate(size_t BlockSize)
-{
-	if (m_pPage == nullptr)
-	{
-		m_pPage = (char*)malloc(BlockSize * CMEMORY_MAX_BLOCK_COUNT);
-		
-		m_MemoryCountLeft = CMEMORY_MAX_BLOCK_COUNT;
-
-		char* pPage = m_pPage;
-
-		for (int i = 1; i <= CMEMORY_MAX_BLOCK_COUNT; ++i)
-		{
-			*pPage = i;
-			pPage += BlockSize;
-		}
-	}
-
-	if (m_MemoryCountLeft <= 0)
+	if (m_vecBlocks.empty())
 		return nullptr;
 
-	char* pAllocatedBlock = m_pPage + (m_BlockIdToAllocate * BlockSize);
+	void* Block = m_vecBlocks.back();	// vecBlock으로부터 데이터 블록 반환. 
+	m_vecBlocks.pop_back();
 
-	m_BlockIdToAllocate = *pAllocatedBlock;
-	--m_MemoryCountLeft;
-
-	return (void*)pAllocatedBlock;
+	return Block;
 }
 
 void CMemoryPool::Deallocate(void* BlockPoint, size_t BlockSize)
 {
-	if (m_MemoryCountLeft >= CMEMORY_MAX_BLOCK_COUNT)
+	// BlockPoint 주소가 m_vecPool의 범위 밖인 경우, 잘못된 BlockPoint.
+	if (BlockPoint < m_vecPool.data() ||
+		BlockPoint >= (m_vecPool.data() + m_vecPool.size()))
 		return;
 
-	*((int*)BlockPoint) = m_BlockIdToAllocate;
+	// BlockPoint 주소가 BlockSize와 맞지않을 경우, 잘못된 BlockPoint.
+	if (((char*)BlockPoint - m_vecPool.data()) % BlockSize == 0)
+		return;
 
-	int Offset = (int)((char*)BlockPoint - m_pPage);
-	Offset /= (int)BlockSize;
 
-	m_BlockIdToAllocate = Offset;
-	++m_MemoryCountLeft;
+	// BlockPoint의 주소를 회수.
+	m_vecBlocks.push_back(BlockPoint);
 }
